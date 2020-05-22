@@ -30,7 +30,7 @@ std::vector<glm::vec2> OBJ_uvs;
 std::vector<glm::vec3> OBJ_normals;
 
 std::vector<CFonts> fonts;
-int frame, currentTime, lastTime=0;
+int frame, currentTime, lastTime = 1;
 float fpsRate = 1.0f;
 
 // ---------------------------------------
@@ -77,7 +77,7 @@ void DisplayScene()
 
 	fonts[1].RenderText("ESC - Exit", 25, 450, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
 	fonts[0].RenderText("Napis", 25, 70, 0.5f, glm::vec3(0.1, 0.1, 1.0f));
-	   	 
+
 	glutSwapBuffers();
 }
 
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
 	glutMouseFunc(MouseButton);
 	glutMotionFunc(MouseMotion);
 	glutMouseWheelFunc(MouseWheel);
-	glutKeyboardFunc(Keyboard);
+	//glutKeyboardFunc(Keyboard);
 	glutSpecialFunc(SpecialKeys);
 
 	glutTimerFunc(5, Animation, 0);

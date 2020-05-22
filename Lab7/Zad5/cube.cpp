@@ -123,7 +123,7 @@ public:
 
 	bool isCollision(const CSceneObject& otherInstance) {
 		float distance = glm::distance(this->Position, otherInstance.Position);
-		if (distance < this->radius + otherInstance.radius) {
+		if (distance <= this->radius + otherInstance.radius) {
 			return true;
 		}
 		return false;
@@ -169,7 +169,7 @@ void DisplayScene()
 	glBindVertexArray(0);
 
 
-	glUniform1f(glGetUniformLocation(program, "hasCollision"), 0);
+	glUniform1f(glGetUniformLocation(program, "hasCollision"), 0.0f);
 
 	myCharacter.Draw();
 
@@ -177,9 +177,9 @@ void DisplayScene()
 	{
 		if (i == ObjectCollisionID)
 		{
-			glUniform1fv(glGetUniformLocation(program, "hasCollision"), 1.0f, &hasCollision);
+			glUniform1f(glGetUniformLocation(program, "hasCollision"), 1.0f);
 			ObjectsTable[i].Draw();
-			glUniform1fv(glGetUniformLocation(program, "hasCollision"), 0.0f, &hasCollision);
+			glUniform1f(glGetUniformLocation(program, "hasCollision"), 0.0f);
 		}
 		else
 		{
@@ -207,7 +207,7 @@ void Reshape(int width, int height)
 // --------------------------------------------------------------
 void Keyboard(unsigned char key, int x, int y)
 {
-	float move_vec = 0.2f;
+	float move_vec = 0.5f;
 
 	switch (key)
 	{
@@ -218,6 +218,7 @@ void Keyboard(unsigned char key, int x, int y)
 	case 'w':
 		myCharacter.MoveXZ(move_vec, 0.0f, ObjectsTable);
 		break;
+
 	case 's':
 		myCharacter.MoveXZ(-move_vec, 0.0f, ObjectsTable);
 		break;
@@ -297,9 +298,6 @@ void Initialize()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-
-
 
 
 	// SPHERE
