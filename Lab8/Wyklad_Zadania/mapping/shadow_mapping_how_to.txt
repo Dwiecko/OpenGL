@@ -1,0 +1,91 @@
+// ------------------------------------
+// Shadow mapping
+// ------------------------------------
+
+// Zalozenia
+// model oswietlenia kierunkowego
+glm::vec3 Light_Direction = glm::normalize(glm::vec3(0.2, -0.8f, 1.1f));
+glm::vec3 Light_Position = glm::vec3(0.0f, 5.0f, -25.0f);
+
+
+// ---------------------------------------
+// ZMIENNE GLOBALNE
+
+GLuint DepthMap_Program;		// program
+GLuint DepthMap_FrameBuffer;	// frame buffer
+GLuint DepthMap_Texture;		// texture
+
+// ---------------------------------------
+// PARAMETRY SHADOW MAPY
+const unsigned int DepthMap_Width = 1024, DepthMap_Height = 1024;
+
+// ---------------------------------------
+// MACIERZE
+glm::mat4 lightProj = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 1.0f, 60.5f);
+glm::mat4 lightView = glm::lookAt(Light_Position,
+                                  Light_Position+Light_Direction,
+                                  glm::vec3( 0.0f, 1.0f,  0.0f));
+
+
+
+// ---------------------------------------
+// INICJALIZACJA
+// ---------------------------------------
+
+// 1. Stworzenie tekstury
+glGenTextures(1, &DepthMap_Texture);
+glBindTexture(GL_TEXTURE_2D, DepthMap_Texture);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+// 2. Stworzenie frame buffer
+glGenFramebuffers(1, &DepthMap_FrameBuffer);
+
+// 3. Polaczenie tekstury i framebuffer
+glBindFramebuffer(GL_FRAMEBUFFER, DepthMap_FrameBuffer);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthMap_Texture, 0);
+glDrawBuffer(GL_NONE);
+glReadBuffer(GL_NONE);
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+// 4. Tworzenie potoku OpenGL dla generowania shadowmapy
+Shadow_Program = glCreateProgram();
+glAttachShader( Shadow_Program, LoadShader(GL_VERTEX_SHADER, "shadow.vertex.glsl"));
+glAttachShader( Shadow_Program, LoadShader(GL_FRAGMENT_SHADER, "shadow.fragment.glsl"));
+LinkAndValidateProgram( Shadow_Program );
+
+
+// ---------------------------------------
+// RENDERING
+// ---------------------------------------
+
+void DisplayScene()
+{
+	// 1. Renderowanie z pozycji swiatla do textury DepthMap
+	glViewport(0, 0, DepthMap_Width, DepthMap_Height);
+	glBindFramebuffer(GL_FRAMEBUFFER, DepthMap_FrameBuffer);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+		DrawShadowMap();
+
+	
+
+	// 2. Renderowanie z pozycji kamery na ekran
+	glViewport(0, 0, Window_Width, Window_Height);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		DrawToScreen();
+
+	glutSwapBuffers();
+}
+
+
+
